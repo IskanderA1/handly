@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"net/http"
 	"os"
@@ -12,12 +13,23 @@ import (
 	delivery "github.com/IskanderA1/handly/iternal/delivery/http"
 	"github.com/IskanderA1/handly/iternal/server"
 	"github.com/IskanderA1/handly/iternal/service"
+	"github.com/IskanderA1/handly/pkg/util"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
 func Run(configPath string) {
 	logrus.SetFormatter(new(logrus.JSONFormatter))
+
+	config, err := util.LoadConfig(configPath)
+	if err != nil {
+		logrus.Fatalf("cannot load config", err.Error())
+	}
+
+	db, err := sql.Open(config.DBDriver, config.DBSource)
+	if err != nil {
+		logrus.Fatalf("error occurred while running http server: %s\n", err.Error())
+	}
 
 	services := service.NewServices()
 
