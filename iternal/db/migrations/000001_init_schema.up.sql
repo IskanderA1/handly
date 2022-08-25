@@ -16,7 +16,7 @@ CREATE TABLE "events" (
   "id" bigserial PRIMARY KEY,
   "project_id" bigint NOT NULL,
   "name" varchar NOT NULL,
-  "event_type" event_type NOT NULL DEFAULT 'event_type.info'
+  "event_type" event_type NOT NULL DEFAULT 'info'
 );
 
 CREATE TABLE "logs" (
