@@ -29,3 +29,7 @@ func RandomString(n int) string {
 
 	return sb.String()
 }
+
+func RandomName() string {
+	return RandomString(6)
+}
