@@ -12,35 +12,27 @@ import (
 const createAccount = `-- name: CreateAccount :one
 INSERT INTO accounts(
     account_id,
-    project_id, 
     name, 
-    token
+    uuid
 ) VALUES (
-    $1, $2, $3, $4
+    $1, $2, $3
 ) 
-RETURNING account_id, project_id, name, token, last_update_at, created_at
+RETURNING account_id, name, uuid, last_update_at, created_at
 `
 
 type CreateAccountParams struct {
 	AccountID string `json:"account_id"`
-	ProjectID int64  `json:"project_id"`
 	Name      string `json:"name"`
-	Token     string `json:"token"`
+	Uuid      string `json:"uuid"`
 }
 
 func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (Account, error) {
-	row := q.db.QueryRowContext(ctx, createAccount,
-		arg.AccountID,
-		arg.ProjectID,
-		arg.Name,
-		arg.Token,
-	)
+	row := q.db.QueryRowContext(ctx, createAccount, arg.AccountID, arg.Name, arg.Uuid)
 	var i Account
 	err := row.Scan(
 		&i.AccountID,
-		&i.ProjectID,
 		&i.Name,
-		&i.Token,
+		&i.Uuid,
 		&i.LastUpdateAt,
 		&i.CreatedAt,
 	)
@@ -57,7 +49,7 @@ func (q *Queries) DeleteAccount(ctx context.Context, accountID string) error {
 }
 
 const getAccount = `-- name: GetAccount :one
-SELECT account_id, project_id, name, token, last_update_at, created_at FROM accounts
+SELECT account_id, name, uuid, last_update_at, created_at FROM accounts
 WHERE account_id = $1 LIMIT 1
 `
 
@@ -66,29 +58,8 @@ func (q *Queries) GetAccount(ctx context.Context, accountID string) (Account, er
 	var i Account
 	err := row.Scan(
 		&i.AccountID,
-		&i.ProjectID,
 		&i.Name,
-		&i.Token,
-		&i.LastUpdateAt,
-		&i.CreatedAt,
-	)
-	return i, err
-}
-
-const getAccountForUpdate = `-- name: GetAccountForUpdate :one
-SELECT account_id, project_id, name, token, last_update_at, created_at FROM accounts
-WHERE account_id = $1 LIMIT 1
-FOR NO KEY UPDATE
-`
-
-func (q *Queries) GetAccountForUpdate(ctx context.Context, accountID string) (Account, error) {
-	row := q.db.QueryRowContext(ctx, getAccountForUpdate, accountID)
-	var i Account
-	err := row.Scan(
-		&i.AccountID,
-		&i.ProjectID,
-		&i.Name,
-		&i.Token,
+		&i.Uuid,
 		&i.LastUpdateAt,
 		&i.CreatedAt,
 	)
@@ -96,7 +67,7 @@ func (q *Queries) GetAccountForUpdate(ctx context.Context, accountID string) (Ac
 }
 
 const listAccounts = `-- name: ListAccounts :many
-SELECT account_id, project_id, name, token, last_update_at, created_at FROM accounts
+SELECT account_id, name, uuid, last_update_at, created_at FROM accounts
 ORDER BY account_id
 LIMIT $1
 OFFSET $2
@@ -118,9 +89,8 @@ func (q *Queries) ListAccounts(ctx context.Context, arg ListAccountsParams) ([]A
 		var i Account
 		if err := rows.Scan(
 			&i.AccountID,
-			&i.ProjectID,
 			&i.Name,
-			&i.Token,
+			&i.Uuid,
 			&i.LastUpdateAt,
 			&i.CreatedAt,
 		); err != nil {
@@ -139,34 +109,26 @@ func (q *Queries) ListAccounts(ctx context.Context, arg ListAccountsParams) ([]A
 
 const updateAccount = `-- name: UpdateAccount :one
 UPDATE accounts
-SET project_id = $2,
-    name = $3,
-    token = $4,
+SET name = $2,
+    uuid = $3,
     last_update_at = now()
 WHERE account_id = $1
-RETURNING account_id, project_id, name, token, last_update_at, created_at
+RETURNING account_id, name, uuid, last_update_at, created_at
 `
 
 type UpdateAccountParams struct {
 	AccountID string `json:"account_id"`
-	ProjectID int64  `json:"project_id"`
 	Name      string `json:"name"`
-	Token     string `json:"token"`
+	Uuid      string `json:"uuid"`
 }
 
 func (q *Queries) UpdateAccount(ctx context.Context, arg UpdateAccountParams) (Account, error) {
-	row := q.db.QueryRowContext(ctx, updateAccount,
-		arg.AccountID,
-		arg.ProjectID,
-		arg.Name,
-		arg.Token,
-	)
+	row := q.db.QueryRowContext(ctx, updateAccount, arg.AccountID, arg.Name, arg.Uuid)
 	var i Account
 	err := row.Scan(
 		&i.AccountID,
-		&i.ProjectID,
 		&i.Name,
-		&i.Token,
+		&i.Uuid,
 		&i.LastUpdateAt,
 		&i.CreatedAt,
 	)

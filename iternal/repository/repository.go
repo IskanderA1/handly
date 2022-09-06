@@ -5,9 +5,18 @@ import (
 	"database/sql"
 
 	db "github.com/IskanderA1/handly/iternal/db/sqlc"
+	"github.com/google/uuid"
 )
 
 //go:generate mockgen -source=repository.go -destination=mocks/mock.go
+
+type Admins interface {
+	Create(ctx context.Context, param db.CreateAdminParams) (db.Admin, error)
+	GetByUsername(ctx context.Context, username string) (db.Admin, error)
+	GetList(ctx context.Context, param db.ListAdminsParams) ([]db.Admin, error)
+	Update(ctx context.Context, param db.UpdateAdminParams) (db.Admin, error)
+	Delete(ctx context.Context, username string) error
+}
 
 type Projects interface {
 	Create(ctx context.Context, param db.CreateProjectParams) (db.Project, error)
@@ -40,18 +49,27 @@ type Logs interface {
 	Delete(ctx context.Context, id int64) error
 }
 
+type Sessions interface {
+	Create(ctx context.Context, param db.CreateSessionParams) (db.Session, error)
+	GetById(ctx context.Context, uuid uuid.UUID) (db.Session, error)
+}
+
 type Repositories struct {
+	Admins   Admins
 	Projects Projects
 	Accounts Accounts
 	Events   Events
 	Logs     Logs
+	Sessions Sessions
 }
 
 func NewRepositories(db *sql.DB) *Repositories {
 	return &Repositories{
+		Admins:   NewAdminssRepo(db),
 		Projects: NewProjectsRepo(db),
 		Accounts: NewAccountsRepo(db),
 		Events:   NewEventsRepo(db),
 		Logs:     NewLogsRepo(db),
+		Sessions: NewSessionsRepo(db),
 	}
 }

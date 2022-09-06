@@ -6,27 +6,35 @@ package db
 
 import (
 	"context"
+
+	"github.com/google/uuid"
 )
 
 type Querier interface {
 	CreateAccount(ctx context.Context, arg CreateAccountParams) (Account, error)
+	CreateAdmin(ctx context.Context, arg CreateAdminParams) (Admin, error)
 	CreateEvent(ctx context.Context, arg CreateEventParams) (Event, error)
 	CreateLog(ctx context.Context, arg CreateLogParams) (Log, error)
 	CreateProject(ctx context.Context, arg CreateProjectParams) (Project, error)
+	CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error)
 	DeleteAccount(ctx context.Context, accountID string) error
+	DeleteAdmin(ctx context.Context, username string) error
 	DeleteEvent(ctx context.Context, id int64) error
 	DeleteLog(ctx context.Context, id int64) error
 	DeleteProject(ctx context.Context, id int64) error
 	GetAccount(ctx context.Context, accountID string) (Account, error)
-	GetAccountForUpdate(ctx context.Context, accountID string) (Account, error)
+	GetAdminByUsername(ctx context.Context, username string) (Admin, error)
 	GetEvent(ctx context.Context, id int64) (Event, error)
 	GetLog(ctx context.Context, id int64) (Log, error)
 	GetProject(ctx context.Context, id int64) (Project, error)
+	GetSession(ctx context.Context, id uuid.UUID) (Session, error)
 	ListAccounts(ctx context.Context, arg ListAccountsParams) ([]Account, error)
+	ListAdmins(ctx context.Context, arg ListAdminsParams) ([]Admin, error)
 	ListEvents(ctx context.Context, arg ListEventsParams) ([]Event, error)
 	ListLogs(ctx context.Context, arg ListLogsParams) ([]Log, error)
 	ListProjects(ctx context.Context, arg ListProjectsParams) ([]Project, error)
 	UpdateAccount(ctx context.Context, arg UpdateAccountParams) (Account, error)
+	UpdateAdmin(ctx context.Context, arg UpdateAdminParams) (Admin, error)
 	UpdateEvent(ctx context.Context, arg UpdateEventParams) (Event, error)
 	UpdateProject(ctx context.Context, arg UpdateProjectParams) (Project, error)
 }

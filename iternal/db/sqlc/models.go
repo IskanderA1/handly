@@ -8,6 +8,8 @@ import (
 	"database/sql"
 	"fmt"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type EventType string
@@ -33,11 +35,17 @@ func (e *EventType) Scan(src interface{}) error {
 
 type Account struct {
 	AccountID    string    `json:"account_id"`
-	ProjectID    int64     `json:"project_id"`
 	Name         string    `json:"name"`
-	Token        string    `json:"token"`
+	Uuid         string    `json:"uuid"`
 	LastUpdateAt time.Time `json:"last_update_at"`
 	CreatedAt    time.Time `json:"created_at"`
+}
+
+type Admin struct {
+	Username  string    `json:"username"`
+	Password  string    `json:"password"`
+	FullName  string    `json:"full_name"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type Event struct {
@@ -61,4 +69,15 @@ type Project struct {
 	Name      string    `json:"name"`
 	Token     string    `json:"token"`
 	CreatedAt time.Time `json:"created_at"`
+}
+
+type Session struct {
+	ID           uuid.UUID `json:"id"`
+	Username     string    `json:"username"`
+	RefreshToken string    `json:"refresh_token"`
+	UserAgent    string    `json:"user_agent"`
+	ClientIp     string    `json:"client_ip"`
+	IsBlocked    bool      `json:"is_blocked"`
+	ExpiresAt    time.Time `json:"expires_at"`
+	CreatedAt    time.Time `json:"created_at"`
 }

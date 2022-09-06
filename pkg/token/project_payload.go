@@ -1,41 +1,42 @@
 package token
 
 import (
-	"errors"
 	"time"
 
 	"github.com/google/uuid"
 )
 
-var (
-	ErrExpiredToken = errors.New("Token has expired")
-	ErrInvalidToken = errors.New("Invalid token")
-)
+type ProjectPayloadInput struct {
+	ProjectId int64
+	Name      string
+}
 
-type Payload struct {
+type ProjectPayload struct {
 	ID        uuid.UUID
+	ProjectId int64     `json:"project_id"`
 	Name      string    `json:"name"`
 	IssuedAt  time.Time `json:"issued_at"`
 	ExpiredAt time.Time `json:"expired_at"`
 }
 
-func NewPayload(name string, duration time.Duration) (*Payload, error) {
+func NewProjectPayload(input ProjectPayloadInput, duration time.Duration) (*ProjectPayload, error) {
 	tokenId, err := uuid.NewRandom()
 	if err != nil {
 		return nil, err
 	}
 
-	payload := &Payload{
+	payload := &ProjectPayload{
 		ID:        tokenId,
-		Name:      name,
+		ProjectId: input.ProjectId,
+		Name:      input.Name,
 		IssuedAt:  time.Now(),
 		ExpiredAt: time.Now().Add(duration),
 	}
 	return payload, nil
 }
 
-func (p *Payload) Valid() error {
-	if time.Now().After(p.ExpiredAt) {
+func (p *ProjectPayload) Valid() error {
+	if time.Now().After(p.ExpiredAt) && !p.ExpiredAt.IsZero() {
 		return ErrExpiredToken
 	}
 	return nil

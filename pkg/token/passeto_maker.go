@@ -8,13 +8,11 @@ import (
 	"github.com/o1egl/paseto"
 )
 
-// PasetoMaker is a PASETO token maker
 type PasetoMaker struct {
 	paseto       *paseto.V2
 	symmetricKey []byte
 }
 
-// NewPasetoMaker creates a new PasetoMaker
 func NewPasetoMaker(symmetricKey string) (Maker, error) {
 	if len(symmetricKey) != chacha20poly1305.KeySize {
 		return nil, fmt.Errorf("invalid key size: must be exactly %d characters", chacha20poly1305.KeySize)
@@ -28,9 +26,8 @@ func NewPasetoMaker(symmetricKey string) (Maker, error) {
 	return maker, nil
 }
 
-// CreateToken creates a new token for a specific username and duration
-func (maker *PasetoMaker) CreateToken(username string, duration time.Duration) (string, *Payload, error) {
-	payload, err := NewPayload(username, duration)
+func (maker *PasetoMaker) CreateProjectToken(input ProjectPayloadInput) (string, *ProjectPayload, error) {
+	payload, err := NewProjectPayload(input, 0)
 	if err != nil {
 		return "", payload, err
 	}
@@ -39,9 +36,34 @@ func (maker *PasetoMaker) CreateToken(username string, duration time.Duration) (
 	return token, payload, err
 }
 
-// VerifyToken checks if the token is valid or not
-func (maker *PasetoMaker) VerifyToken(token string) (*Payload, error) {
-	payload := &Payload{}
+func (maker *PasetoMaker) VerifyProjectToken(token string) (*ProjectPayload, error) {
+	payload := &ProjectPayload{}
+
+	err := maker.paseto.Decrypt(token, maker.symmetricKey, payload, nil)
+	if err != nil {
+		return nil, ErrInvalidToken
+	}
+
+	err = payload.Valid()
+	if err != nil {
+		return nil, err
+	}
+
+	return payload, nil
+}
+
+func (maker *PasetoMaker) CreateAdminToken(username string, duration time.Duration) (string, *AdminPayload, error) {
+	payload, err := NewAdminPayload(username, duration)
+	if err != nil {
+		return "", payload, err
+	}
+
+	token, err := maker.paseto.Encrypt(maker.symmetricKey, payload, nil)
+	return token, payload, err
+}
+
+func (maker *PasetoMaker) VerifyAdminToken(token string) (*AdminPayload, error) {
+	payload := &AdminPayload{}
 
 	err := maker.paseto.Decrypt(token, maker.symmetricKey, payload, nil)
 	if err != nil {

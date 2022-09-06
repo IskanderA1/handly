@@ -11,27 +11,32 @@ import (
 	"time"
 
 	delivery "github.com/IskanderA1/handly/iternal/delivery/http"
+	"github.com/IskanderA1/handly/iternal/repository"
 	"github.com/IskanderA1/handly/iternal/server"
 	"github.com/IskanderA1/handly/iternal/service"
-	"github.com/IskanderA1/handly/pkg/util"
+	"github.com/IskanderA1/handly/pkg/config"
+	"github.com/IskanderA1/handly/pkg/token"
 	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 )
 
 func Run(configPath string) {
 	logrus.SetFormatter(new(logrus.JSONFormatter))
 
-	config, err := util.LoadConfig(configPath)
+	config, err := config.LoadConfig(configPath)
 	if err != nil {
 		logrus.Fatalf("cannot load config", err.Error())
 	}
 
+	tokeManger, err := token.NewPasetoMaker(config.TokenSymmetricKey)
+
 	db, err := sql.Open(config.DBDriver, config.DBSource)
 	if err != nil {
-		logrus.Fatalf("error occurred while running http server: %s\n", err.Error())
+		logrus.Fatalf("error occurred while connect to db: %s\n", err.Error())
 	}
 
-	services := service.NewServices()
+	repo := repository.NewRepositories(db)
+
+	services := service.NewServices(repo, tokeManger, config)
 
 	handlers := delivery.NewHandler(services)
 
@@ -59,10 +64,4 @@ func Run(configPath string) {
 	if err := srv.Stop(ctx); err != nil {
 		logrus.Fatalf("failed to stop server: %v", err)
 	}
-}
-
-func initConfig() error {
-	viper.AddConfigPath("configs")
-	viper.SetConfigName("main")
-	return viper.ReadInConfig()
 }

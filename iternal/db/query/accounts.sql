@@ -1,22 +1,16 @@
 -- name: CreateAccount :one
 INSERT INTO accounts(
     account_id,
-    project_id, 
     name, 
-    token
+    uuid
 ) VALUES (
-    $1, $2, $3, $4
+    $1, $2, $3
 ) 
 RETURNING *;
 
 -- name: GetAccount :one
 SELECT * FROM accounts
 WHERE account_id = $1 LIMIT 1;
-
--- name: GetAccountForUpdate :one
-SELECT * FROM accounts
-WHERE account_id = $1 LIMIT 1
-FOR NO KEY UPDATE;
 
 -- name: ListAccounts :many
 SELECT * FROM accounts
@@ -26,9 +20,8 @@ OFFSET $2;
 
 -- name: UpdateAccount :one
 UPDATE accounts
-SET project_id = $2,
-    name = $3,
-    token = $4,
+SET name = $2,
+    uuid = $3,
     last_update_at = now()
 WHERE account_id = $1
 RETURNING *;
