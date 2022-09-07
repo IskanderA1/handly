@@ -45,10 +45,10 @@ func (s *AdminsService) SignIn(ctx context.Context, input AdminSingInInput, admi
 	return s.createSession(ctx, admin, adminConfig)
 }
 
-func (s *AdminsService) SignUp(ctx context.Context, input AdminSignUpInput, adminConfig AdminConfig) (domain.Session, error) {
+func (s *AdminsService) SignUp(ctx context.Context, input AdminSignUpInput, adminConfig AdminConfig) (domain.Admin, error) {
 	hashedPassword, err := passwordHash.HashPassword(input.Password)
 	if err != nil {
-		return domain.Session{}, fmt.Errorf("Invalid password")
+		return domain.Admin{}, fmt.Errorf("Invalid password")
 	}
 	admin, err := s.adminRepository.Create(ctx, db.CreateAdminParams{
 		Username: input.Username,
@@ -57,10 +57,10 @@ func (s *AdminsService) SignUp(ctx context.Context, input AdminSignUpInput, admi
 	})
 
 	if err != nil {
-		return domain.Session{}, err
+		return domain.Admin{}, err
 	}
 
-	return s.createSession(ctx, admin, adminConfig)
+	return domain.NewAdmin(admin), err
 }
 
 func (s *AdminsService) RefreshToken(ctx context.Context, refreshToken string) (domain.Session, error) {
@@ -107,8 +107,11 @@ func (s *AdminsService) RefreshToken(ctx context.Context, refreshToken string) (
 	}, err
 }
 
-func (s *AdminsService) GetList(ctx context.Context, input db.ListAdminsParams) ([]domain.Admin, error) {
-	admins, err := s.adminRepository.GetList(ctx, input)
+func (s *AdminsService) GetList(ctx context.Context, input ListInput) ([]domain.Admin, error) {
+	admins, err := s.adminRepository.GetList(ctx, db.ListAdminsParams{
+		Limit:  input.Limit,
+		Offset: input.Offset,
+	})
 	if err != nil {
 		return make([]domain.Admin, 0), err
 	}

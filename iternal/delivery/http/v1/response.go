@@ -10,15 +10,11 @@ type dataResponse struct {
 	Count int64       `json:"count"`
 }
 
-type idResponse struct {
-	ID interface{} `json:"id"`
-}
-
 type response struct {
 	Message string `json:"message"`
 }
 
-func newResponse(c *gin.Context, statusCode int, message string) {
+func errorResponse(c *gin.Context, statusCode int, message string) {
 	logrus.Errorf(message)
 	c.AbortWithStatusJSON(statusCode, response{message})
 }

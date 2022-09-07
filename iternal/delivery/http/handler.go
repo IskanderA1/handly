@@ -5,33 +5,25 @@ import (
 
 	v1 "github.com/IskanderA1/handly/iternal/delivery/http/v1"
 	"github.com/IskanderA1/handly/iternal/service"
+	"github.com/IskanderA1/handly/pkg/token"
 	"github.com/gin-gonic/gin"
 )
 
 type Handler struct {
-	services *service.Services
+	services   *service.Services
+	tokenMaker token.Maker
 }
 
-func NewHandler(services *service.Services) *Handler {
+func NewHandler(services *service.Services, tokenMaker token.Maker) *Handler {
 	return &Handler{
-		services: services,
+		services:   services,
+		tokenMaker: tokenMaker,
 	}
 }
 
 func (h *Handler) Init() *gin.Engine {
-	// Init gin handler
 	router := gin.Default()
 
-	// docs.SwaggerInfo.Host = fmt.Sprintf("%s:%s", cfg.HTTP.Host, cfg.HTTP.Port)
-	// if cfg.Environment != config.EnvLocal {
-	// 	docs.SwaggerInfo.Host = cfg.HTTP.Host
-	// }
-
-	// if cfg.Environment != config.Prod {
-	// 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	// }
-
-	// Init router
 	router.GET("/ping", func(c *gin.Context) {
 		c.String(http.StatusOK, "pong")
 	})
@@ -42,7 +34,7 @@ func (h *Handler) Init() *gin.Engine {
 }
 
 func (h *Handler) initAPI(router *gin.Engine) {
-	handlerV1 := v1.NewHandler(h.services)
+	handlerV1 := v1.NewHandler(h.services, h.tokenMaker)
 	api := router.Group("/api")
 	{
 		handlerV1.Init(api)

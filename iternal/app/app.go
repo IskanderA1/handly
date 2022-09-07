@@ -16,6 +16,7 @@ import (
 	"github.com/IskanderA1/handly/iternal/service"
 	"github.com/IskanderA1/handly/pkg/config"
 	"github.com/IskanderA1/handly/pkg/token"
+	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 )
 
@@ -38,9 +39,9 @@ func Run(configPath string) {
 
 	services := service.NewServices(repo, tokeManger, config)
 
-	handlers := delivery.NewHandler(services)
+	handlers := delivery.NewHandler(services, tokeManger)
 
-	srv := server.NewServer(handlers.Init())
+	srv := server.NewServer(handlers.Init(), config)
 
 	go func() {
 		if err := srv.Run(); !errors.Is(err, http.ErrServerClosed) {

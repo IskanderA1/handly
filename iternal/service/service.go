@@ -41,7 +41,7 @@ type AdminConfig struct {
 
 type Admins interface {
 	SignIn(ctx context.Context, input AdminSingInInput, adminConfig AdminConfig) (domain.Session, error)
-	SignUp(ctx context.Context, input AdminSignUpInput, adminConfig AdminConfig) (domain.Session, error)
+	SignUp(ctx context.Context, input AdminSignUpInput, adminConfig AdminConfig) (domain.Admin, error)
 	RefreshToken(ctx context.Context, refreshToken string) (domain.Session, error)
 	GetList(ctx context.Context, input ListInput) ([]domain.Admin, error)
 	GetByName(ctx context.Context, username string) (domain.Admin, error)
@@ -50,12 +50,15 @@ type Admins interface {
 
 type Services struct {
 	Projects Projects
+	Admins   Admins
 }
 
 func NewServices(repositories *repository.Repositories, tokenManger token.Maker, config config.Config) *Services {
 	projectsService := NewProjectsService(repositories.Projects, tokenManger)
+	adminsService := NewAdminsService(repositories.Admins, repositories.Sessions, tokenManger, config)
 
 	return &Services{
 		Projects: projectsService,
+		Admins:   adminsService,
 	}
 }
