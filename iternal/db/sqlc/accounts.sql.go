@@ -21,7 +21,7 @@ RETURNING account_id, name, uuid, last_update_at, created_at
 `
 
 type CreateAccountParams struct {
-	AccountID string `json:"account_id"`
+	AccountID string `json:"accountID"`
 	Name      string `json:"name"`
 	Uuid      string `json:"uuid"`
 }
@@ -117,7 +117,7 @@ RETURNING account_id, name, uuid, last_update_at, created_at
 `
 
 type UpdateAccountParams struct {
-	AccountID string `json:"account_id"`
+	AccountID string `json:"accountID"`
 	Name      string `json:"name"`
 	Uuid      string `json:"uuid"`
 }

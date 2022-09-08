@@ -8,8 +8,8 @@ import (
 
 type Admin struct {
 	Username  string    `json:"username"`
-	FullName  string    `json:"full_name"`
-	CreatedAt time.Time `json:"created_at"`
+	FullName  string    `json:"fullName"`
+	CreatedAt time.Time `json:"createdAt"`
 }
 
 func NewAdmin(admin db.Admin) Admin {

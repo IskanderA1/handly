@@ -23,7 +23,7 @@ RETURNING username, password, full_name, created_at
 type CreateAdminParams struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
-	FullName string `json:"full_name"`
+	FullName string `json:"fullName"`
 }
 
 func (q *Queries) CreateAdmin(ctx context.Context, arg CreateAdminParams) (Admin, error) {
@@ -114,7 +114,7 @@ RETURNING username, password, full_name, created_at
 type UpdateAdminParams struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
-	FullName string `json:"full_name"`
+	FullName string `json:"fullName"`
 }
 
 func (q *Queries) UpdateAdmin(ctx context.Context, arg UpdateAdminParams) (Admin, error) {

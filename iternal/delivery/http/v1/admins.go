@@ -14,12 +14,21 @@ func (h *Handler) initAdminRoutes(api *gin.RouterGroup) {
 		admins.POST("/sign-in", h.adminSignIn)
 		admins.POST("/auth/refresh", h.adminRefresh)
 
-		authenticated := admins.Group("/").Use(h.authMiddleware())
+		authenticated := admins.Group("/", h.authMiddleware)
 		{
 			authenticated.GET("/:username", h.adminGetByUsername)
 			authenticated.DELETE("/:username", h.adminDeleteByUsername)
 			authenticated.GET("/list", h.adminsGetList)
 			authenticated.POST("/sign-up", h.adminSignUp)
+
+			project := authenticated.Group("/projects")
+			{
+				project.POST("/create", h.projectCreate)
+				project.POST("/refresh/:id", h.projectRefresh)
+				project.GET("/list", h.projectGetList)
+				project.GET("/:id", h.projectGetById)
+				project.DELETE("/:id", h.projectDeleteById)
+			}
 		}
 	}
 }

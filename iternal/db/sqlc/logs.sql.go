@@ -23,9 +23,9 @@ RETURNING id, project_id, event_id, account_id, data, created_at
 `
 
 type CreateLogParams struct {
-	ProjectID int64          `json:"project_id"`
-	EventID   int64          `json:"event_id"`
-	AccountID string         `json:"account_id"`
+	ProjectID int64          `json:"projectID"`
+	EventID   int64          `json:"eventID"`
+	AccountID string         `json:"accountID"`
 	Data      sql.NullString `json:"data"`
 }
 

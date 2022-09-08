@@ -2,8 +2,11 @@ package service
 
 import (
 	"context"
+	"database/sql"
+	"fmt"
 
 	db "github.com/IskanderA1/handly/iternal/db/sqlc"
+	"github.com/IskanderA1/handly/iternal/domain"
 	"github.com/IskanderA1/handly/iternal/repository"
 	"github.com/IskanderA1/handly/pkg/token"
 	"github.com/IskanderA1/handly/pkg/validator"
@@ -21,10 +24,10 @@ func NewProjectsService(repository repository.Projects, tokenManger token.Maker)
 	}
 }
 
-func (s *ProjectsService) Create(ctx context.Context, username string) (db.Project, error) {
+func (s *ProjectsService) Create(ctx context.Context, username string) (domain.ProjectWithToken, error) {
 
 	if err := validator.ValidateFullName(username); err != nil {
-		return db.Project{}, err
+		return domain.ProjectWithToken{}, err
 	}
 
 	param := db.CreateProjectParams{
@@ -35,7 +38,7 @@ func (s *ProjectsService) Create(ctx context.Context, username string) (db.Proje
 	project, err := s.repository.Create(ctx, param)
 
 	if err != nil {
-		return db.Project{}, err
+		return domain.ProjectWithToken{}, err
 	}
 
 	token, _, err := s.tokenManger.CreateProjectToken(token.ProjectPayloadInput{
@@ -43,7 +46,7 @@ func (s *ProjectsService) Create(ctx context.Context, username string) (db.Proje
 		Name:      project.Name,
 	})
 	if err != nil {
-		return db.Project{}, err
+		return domain.ProjectWithToken{}, err
 	}
 
 	updateParam := db.UpdateProjectParams{
@@ -52,22 +55,26 @@ func (s *ProjectsService) Create(ctx context.Context, username string) (db.Proje
 		Token: token,
 	}
 
-	return s.repository.Update(ctx, updateParam)
+	res, err := s.repository.Update(ctx, updateParam)
+
+	return domain.NewProjectWithToken(res), err
 }
 
-func (s *ProjectsService) RefreshTokens(ctx context.Context, refreshToken string) (db.Project, error) {
-	oldPayload, err := s.tokenManger.VerifyProjectToken(refreshToken)
-	if err != nil {
-		return db.Project{}, err
-	}
+func (s *ProjectsService) RefreshTokens(ctx context.Context, id int64) (domain.ProjectWithToken, error) {
+	res, err := s.repository.GetById(ctx, id)
 
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return domain.ProjectWithToken{}, fmt.Errorf("project not found")
+		}
+	}
 	token, payload, err := s.tokenManger.CreateProjectToken(token.ProjectPayloadInput{
-		ProjectId: oldPayload.ProjectId,
-		Name:      oldPayload.Name,
+		ProjectId: res.ID,
+		Name:      res.Name,
 	})
 
 	if err != nil {
-		return db.Project{}, err
+		return domain.ProjectWithToken{}, err
 	}
 
 	param := db.UpdateProjectParams{
@@ -76,20 +83,50 @@ func (s *ProjectsService) RefreshTokens(ctx context.Context, refreshToken string
 		Token: token,
 	}
 
-	return s.repository.Update(ctx, param)
+	res, err = s.repository.Update(ctx, param)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return domain.ProjectWithToken{}, fmt.Errorf("project not found")
+		}
+	}
+
+	return domain.NewProjectWithToken(res), err
 }
 
-func (s *ProjectsService) GetList(ctx context.Context, input ListInput) ([]db.Project, error) {
-	return s.repository.GetList(ctx, db.ListProjectsParams{
+func (s *ProjectsService) GetList(ctx context.Context, input ListInput) ([]domain.Project, error) {
+
+	res, err := s.repository.GetList(ctx, db.ListProjectsParams{
 		Limit:  input.Limit,
 		Offset: input.Offset,
 	})
+
+	projects := make([]domain.Project, 0)
+
+	for _, project := range res {
+		projects = append(projects, domain.NewProject(project))
+	}
+
+	return projects, err
 }
 
-func (s *ProjectsService) GetById(ctx context.Context, id int64) (db.Project, error) {
-	return s.repository.GetById(ctx, id)
+func (s *ProjectsService) GetById(ctx context.Context, id int64) (domain.ProjectWithToken, error) {
+
+	res, err := s.repository.GetById(ctx, id)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return domain.ProjectWithToken{}, fmt.Errorf("project not found")
+		}
+	}
+
+	return domain.NewProjectWithToken(res), err
 }
 
 func (s *ProjectsService) Delete(ctx context.Context, id int64) error {
-	return s.repository.Delete(ctx, id)
+	err := s.repository.Delete(ctx, id)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return fmt.Errorf("project not found")
+		}
+	}
+	return err
 }

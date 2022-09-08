@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 
-	db "github.com/IskanderA1/handly/iternal/db/sqlc"
 	"github.com/IskanderA1/handly/iternal/domain"
 	"github.com/IskanderA1/handly/iternal/repository"
 	"github.com/IskanderA1/handly/pkg/config"
@@ -16,10 +15,10 @@ type ListInput struct {
 }
 
 type Projects interface {
-	Create(ctx context.Context, name string) (db.Project, error)
-	RefreshTokens(ctx context.Context, refreshToken string) (db.Project, error)
-	GetList(ctx context.Context, input ListInput) ([]db.Project, error)
-	GetById(ctx context.Context, id int64) (db.Project, error)
+	Create(ctx context.Context, name string) (domain.ProjectWithToken, error)
+	RefreshTokens(ctx context.Context, id int64) (domain.ProjectWithToken, error)
+	GetList(ctx context.Context, input ListInput) ([]domain.Project, error)
+	GetById(ctx context.Context, id int64) (domain.ProjectWithToken, error)
 	Delete(ctx context.Context, id int64) error
 }
 

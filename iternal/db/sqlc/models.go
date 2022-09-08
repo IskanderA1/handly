@@ -34,50 +34,50 @@ func (e *EventType) Scan(src interface{}) error {
 }
 
 type Account struct {
-	AccountID    string    `json:"account_id"`
+	AccountID    string    `json:"accountID"`
 	Name         string    `json:"name"`
 	Uuid         string    `json:"uuid"`
-	LastUpdateAt time.Time `json:"last_update_at"`
-	CreatedAt    time.Time `json:"created_at"`
+	LastUpdateAt time.Time `json:"lastUpdateAt"`
+	CreatedAt    time.Time `json:"createdAt"`
 }
 
 type Admin struct {
 	Username  string    `json:"username"`
 	Password  string    `json:"password"`
-	FullName  string    `json:"full_name"`
-	CreatedAt time.Time `json:"created_at"`
+	FullName  string    `json:"fullName"`
+	CreatedAt time.Time `json:"createdAt"`
 }
 
 type Event struct {
 	ID        int64     `json:"id"`
-	ProjectID int64     `json:"project_id"`
+	ProjectID int64     `json:"projectID"`
 	Name      string    `json:"name"`
-	EventType EventType `json:"event_type"`
+	EventType EventType `json:"eventType"`
 }
 
 type Log struct {
 	ID        int64          `json:"id"`
-	ProjectID int64          `json:"project_id"`
-	EventID   int64          `json:"event_id"`
-	AccountID string         `json:"account_id"`
+	ProjectID int64          `json:"projectID"`
+	EventID   int64          `json:"eventID"`
+	AccountID string         `json:"accountID"`
 	Data      sql.NullString `json:"data"`
-	CreatedAt time.Time      `json:"created_at"`
+	CreatedAt time.Time      `json:"createdAt"`
 }
 
 type Project struct {
 	ID        int64     `json:"id"`
 	Name      string    `json:"name"`
 	Token     string    `json:"token"`
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt time.Time `json:"createdAt"`
 }
 
 type Session struct {
 	ID           uuid.UUID `json:"id"`
 	Username     string    `json:"username"`
-	RefreshToken string    `json:"refresh_token"`
-	UserAgent    string    `json:"user_agent"`
-	ClientIp     string    `json:"client_ip"`
-	IsBlocked    bool      `json:"is_blocked"`
-	ExpiresAt    time.Time `json:"expires_at"`
-	CreatedAt    time.Time `json:"created_at"`
+	RefreshToken string    `json:"refreshToken"`
+	UserAgent    string    `json:"userAgent"`
+	ClientIp     string    `json:"clientIp"`
+	IsBlocked    bool      `json:"isBlocked"`
+	ExpiresAt    time.Time `json:"expiresAt"`
+	CreatedAt    time.Time `json:"createdAt"`
 }

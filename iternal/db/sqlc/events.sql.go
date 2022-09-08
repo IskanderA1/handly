@@ -21,9 +21,9 @@ RETURNING id, project_id, name, event_type
 `
 
 type CreateEventParams struct {
-	ProjectID int64     `json:"project_id"`
+	ProjectID int64     `json:"projectID"`
 	Name      string    `json:"name"`
-	EventType EventType `json:"event_type"`
+	EventType EventType `json:"eventType"`
 }
 
 func (q *Queries) CreateEvent(ctx context.Context, arg CreateEventParams) (Event, error) {
@@ -115,7 +115,7 @@ RETURNING id, project_id, name, event_type
 type UpdateEventParams struct {
 	ID        int64     `json:"id"`
 	Name      string    `json:"name"`
-	EventType EventType `json:"event_type"`
+	EventType EventType `json:"eventType"`
 }
 
 func (q *Queries) UpdateEvent(ctx context.Context, arg UpdateEventParams) (Event, error) {
