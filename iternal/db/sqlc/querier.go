@@ -30,7 +30,7 @@ type Querier interface {
 	GetSession(ctx context.Context, id uuid.UUID) (Session, error)
 	ListAccounts(ctx context.Context, arg ListAccountsParams) ([]Account, error)
 	ListAdmins(ctx context.Context, arg ListAdminsParams) ([]Admin, error)
-	ListEvents(ctx context.Context, arg ListEventsParams) ([]Event, error)
+	ListEventsByProjectId(ctx context.Context, projectID int64) ([]Event, error)
 	ListLogs(ctx context.Context, arg ListLogsParams) ([]Log, error)
 	ListProjects(ctx context.Context, arg ListProjectsParams) ([]Project, error)
 	UpdateAccount(ctx context.Context, arg UpdateAccountParams) (Account, error)

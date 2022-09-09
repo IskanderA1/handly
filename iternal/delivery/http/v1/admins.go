@@ -8,7 +8,32 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type signInInput struct {
+	Username string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
+type refreshInput struct {
+	RefreshToken string `json:"refreshToken" binding:"required"`
+}
+
+type successResponse struct {
+	Success bool `json:"success"`
+}
+
+type listAccountRequest struct {
+	PageID   int32 `json:"page_id" binding:"required,min=1"`
+	PageSize int32 `json:"page_size" binding:"required,min=5,max=10"`
+}
+
+type signUpInput struct {
+	Username string `json:"username" binding:"required"`
+	FullName string `json:"fullname" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
 func (h *Handler) initAdminRoutes(api *gin.RouterGroup) {
+
 	admins := api.Group("/admins")
 	{
 		admins.POST("/sign-in", h.adminSignIn)
@@ -29,13 +54,17 @@ func (h *Handler) initAdminRoutes(api *gin.RouterGroup) {
 				project.GET("/:id", h.projectGetById)
 				project.DELETE("/:id", h.projectDeleteById)
 			}
+
+			events := authenticated.Group("/events")
+			{
+				events.POST("/create", h.eventCreate)
+				events.POST("/update", h.eventUpdate)
+				events.GET("/list/:project-id", h.eventGetListByProjectId)
+				events.GET("/:id", h.eventGetById)
+				events.DELETE("/:id", h.eventDeleteById)
+			}
 		}
 	}
-}
-
-type signInInput struct {
-	Username string `json:"username" binding:"required"`
-	Password string `json:"password" binding:"required"`
 }
 
 func (h *Handler) adminSignIn(ctx *gin.Context) {
@@ -62,10 +91,6 @@ func (h *Handler) adminSignIn(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, res)
-}
-
-type refreshInput struct {
-	RefreshToken string `json:"refreshToken" binding:"required"`
 }
 
 func (h *Handler) adminRefresh(ctx *gin.Context) {
@@ -101,10 +126,6 @@ func (h *Handler) adminGetByUsername(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res)
 }
 
-type successResponse struct {
-	Success bool `json:"success"`
-}
-
 func (h *Handler) adminDeleteByUsername(ctx *gin.Context) {
 	username, err := parseUsernameFromPath(ctx, "username")
 	if err != nil {
@@ -121,11 +142,6 @@ func (h *Handler) adminDeleteByUsername(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, successResponse{
 		Success: true,
 	})
-}
-
-type listAccountRequest struct {
-	PageID   int32 `json:"page_id" binding:"required,min=1"`
-	PageSize int32 `json:"page_size" binding:"required,min=5,max=10"`
 }
 
 func (h *Handler) adminsGetList(ctx *gin.Context) {
@@ -146,12 +162,6 @@ func (h *Handler) adminsGetList(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, res)
-}
-
-type signUpInput struct {
-	Username string `json:"username" binding:"required"`
-	FullName string `json:"fullname" binding:"required"`
-	Password string `json:"password" binding:"required"`
 }
 
 func (h *Handler) adminSignUp(ctx *gin.Context) {

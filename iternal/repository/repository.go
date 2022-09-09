@@ -37,7 +37,7 @@ type Accounts interface {
 type Events interface {
 	Create(ctx context.Context, param db.CreateEventParams) (db.Event, error)
 	GetById(ctx context.Context, id int64) (db.Event, error)
-	GetList(ctx context.Context, param db.ListEventsParams) ([]db.Event, error)
+	GetListEventsByProjectId(ctx context.Context, projectID int64) ([]db.Event, error)
 	Update(ctx context.Context, param db.UpdateEventParams) (db.Event, error)
 	Delete(ctx context.Context, id int64) error
 }

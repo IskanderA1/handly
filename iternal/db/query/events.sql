@@ -13,11 +13,10 @@ SELECT * FROM events
 WHERE id = $1 LIMIT 1;
 
 
--- name: ListEvents :many
+-- name: ListEventsByProjectId :many
 SELECT * FROM events
-ORDER BY id
-LIMIT $1
-OFFSET $2;
+WHERE project_id = $1
+ORDER BY id;
 
 -- name: UpdateEvent :one
 UPDATE events

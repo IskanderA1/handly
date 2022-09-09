@@ -50,14 +50,37 @@ type Admins interface {
 type Services struct {
 	Projects Projects
 	Admins   Admins
+	Events   Events
+}
+
+type CreateEventInput struct {
+	ProjectID int64
+	Name      string
+	EventType domain.EventType
+}
+
+type UpdateEventInput struct {
+	ID        int64
+	Name      string
+	EventType domain.EventType
+}
+
+type Events interface {
+	Create(ctx context.Context, inp CreateEventInput) (domain.Event, error)
+	GetById(ctx context.Context, id int64) (domain.Event, error)
+	GetListByProjectId(ctx context.Context, projectID int64) ([]domain.Event, error)
+	Update(ctx context.Context, inp UpdateEventInput) (domain.Event, error)
+	Delete(ctx context.Context, id int64) error
 }
 
 func NewServices(repositories *repository.Repositories, tokenManger token.Maker, config config.Config) *Services {
 	projectsService := NewProjectsService(repositories.Projects, tokenManger)
 	adminsService := NewAdminsService(repositories.Admins, repositories.Sessions, tokenManger, config)
+	eventsService := NewEventsService(repositories.Events)
 
 	return &Services{
 		Projects: projectsService,
 		Admins:   adminsService,
+		Events:   eventsService,
 	}
 }

@@ -64,20 +64,14 @@ func (q *Queries) GetEvent(ctx context.Context, id int64) (Event, error) {
 	return i, err
 }
 
-const listEvents = `-- name: ListEvents :many
+const listEventsByProjectId = `-- name: ListEventsByProjectId :many
 SELECT id, project_id, name, event_type FROM events
+WHERE project_id = $1
 ORDER BY id
-LIMIT $1
-OFFSET $2
 `
 
-type ListEventsParams struct {
-	Limit  int32 `json:"limit"`
-	Offset int32 `json:"offset"`
-}
-
-func (q *Queries) ListEvents(ctx context.Context, arg ListEventsParams) ([]Event, error) {
-	rows, err := q.db.QueryContext(ctx, listEvents, arg.Limit, arg.Offset)
+func (q *Queries) ListEventsByProjectId(ctx context.Context, projectID int64) ([]Event, error) {
+	rows, err := q.db.QueryContext(ctx, listEventsByProjectId, projectID)
 	if err != nil {
 		return nil, err
 	}
