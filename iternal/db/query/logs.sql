@@ -3,23 +3,27 @@
 INSERT INTO logs(
     project_id,
     event_id,
-    account_id,
+    user_id,
     data
 ) VALUES (
     $1, $2, $3, $4
 ) 
 RETURNING *;
 
--- name: GetLog :one
+-- name: ListProjectLog :many
 SELECT * FROM logs
-WHERE id = $1 LIMIT 1;
+WHERE project_id = $1
+ORDER BY created_at
+LIMIT $2
+OFFSET $3;
 
-
--- name: ListLogs :many
+-- name: ListUserLog :many
 SELECT * FROM logs
-ORDER BY id
-LIMIT $1
-OFFSET $2;
+WHERE user_id = $1
+ORDER BY created_at
+LIMIT $2
+OFFSET $3;
 
--- name: DeleteLog :exec
-DELETE FROM logs WHERE id = $1;
+
+-- name: DeleteProjectLogs :exec
+DELETE FROM logs WHERE project_id = $1;

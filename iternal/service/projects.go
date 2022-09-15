@@ -13,14 +13,14 @@ import (
 )
 
 type ProjectsService struct {
-	repository  repository.Projects
-	tokenManger token.Maker
+	repository         repository.Projects
+	projectTokenManger token.Maker[token.ProjectPayload, token.ProjectPayloadInput]
 }
 
-func NewProjectsService(repository repository.Projects, tokenManger token.Maker) *ProjectsService {
+func NewProjectsService(repository repository.Projects, projectTokenManger token.Maker[token.ProjectPayload, token.ProjectPayloadInput]) *ProjectsService {
 	return &ProjectsService{
-		repository:  repository,
-		tokenManger: tokenManger,
+		repository:         repository,
+		projectTokenManger: projectTokenManger,
 	}
 }
 
@@ -41,21 +41,16 @@ func (s *ProjectsService) Create(ctx context.Context, username string) (domain.P
 		return domain.ProjectWithToken{}, err
 	}
 
-	token, _, err := s.tokenManger.CreateProjectToken(token.ProjectPayloadInput{
+	token, _, err := s.projectTokenManger.CreateToken(token.ProjectPayloadInput{
 		ProjectId: project.ID,
-		Name:      project.Name,
+		Name:      username,
 	})
-	if err != nil {
-		return domain.ProjectWithToken{}, err
-	}
 
-	updateParam := db.UpdateProjectParams{
+	res, err := s.repository.Update(ctx, db.UpdateProjectParams{
 		ID:    project.ID,
 		Name:  username,
 		Token: token,
-	}
-
-	res, err := s.repository.Update(ctx, updateParam)
+	})
 
 	return domain.NewProjectWithToken(res), err
 }
@@ -68,22 +63,17 @@ func (s *ProjectsService) RefreshTokens(ctx context.Context, id int64) (domain.P
 			return domain.ProjectWithToken{}, fmt.Errorf("project not found")
 		}
 	}
-	token, payload, err := s.tokenManger.CreateProjectToken(token.ProjectPayloadInput{
+	token, _, err := s.projectTokenManger.CreateToken(token.ProjectPayloadInput{
 		ProjectId: res.ID,
 		Name:      res.Name,
 	})
 
-	if err != nil {
-		return domain.ProjectWithToken{}, err
-	}
-
-	param := db.UpdateProjectParams{
-		ID:    payload.ProjectId,
-		Name:  payload.Name,
+	res, err = s.repository.Update(ctx, db.UpdateProjectParams{
+		ID:    res.ID,
+		Name:  res.Name,
 		Token: token,
-	}
+	})
 
-	res, err = s.repository.Update(ctx, param)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return domain.ProjectWithToken{}, fmt.Errorf("project not found")

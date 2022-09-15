@@ -28,7 +28,9 @@ func Run(configPath string) {
 		logrus.Fatalf("cannot load config", err.Error())
 	}
 
-	tokeManger, err := token.NewPasetoMaker(config.TokenSymmetricKey)
+	adminTokeManger, err := token.NewPasetoMaker(config.TokenSymmetricKey)
+
+	projectTokeManger, err := token.NewJWTMaker(config.TokenSymmetricKey)
 
 	db, err := sql.Open(config.DBDriver, config.DBSource)
 	if err != nil {
@@ -37,9 +39,21 @@ func Run(configPath string) {
 
 	repo := repository.NewRepositories(db)
 
-	services := service.NewServices(repo, tokeManger, config)
+	sd := service.ServiceDependence{
+		Repositories:       repo,
+		AdminTokenManger:   adminTokeManger,
+		ProjectTokenManger: projectTokeManger,
+		Config:             config,
+	}
+	services := service.NewServices(sd)
 
-	handlers := delivery.NewHandler(services, tokeManger)
+	hd := delivery.HandlerDependence{
+		Services:           services,
+		AdminTokenManger:   adminTokeManger,
+		ProjectTokenManger: projectTokeManger,
+	}
+
+	handlers := delivery.NewHandler(hd)
 
 	srv := server.NewServer(handlers.Init(), config)
 

@@ -2,7 +2,6 @@ package token
 
 import (
 	"errors"
-	"time"
 )
 
 var (
@@ -10,9 +9,7 @@ var (
 	ErrInvalidToken = errors.New("Invalid token")
 )
 
-type Maker interface {
-	CreateProjectToken(input ProjectPayloadInput) (string, *ProjectPayload, error)
-	VerifyProjectToken(token string) (*ProjectPayload, error)
-	CreateAdminToken(username string, duration time.Duration) (string, *AdminPayload, error)
-	VerifyAdminToken(token string) (*AdminPayload, error)
+type Maker[Payload, Input comparable] interface {
+	CreateToken(inp Input) (string, *Payload, error)
+	VerifyToken(token string) (*Payload, error)
 }

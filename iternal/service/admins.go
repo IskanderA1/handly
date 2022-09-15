@@ -9,26 +9,41 @@ import (
 	db "github.com/IskanderA1/handly/iternal/db/sqlc"
 	"github.com/IskanderA1/handly/iternal/domain"
 	"github.com/IskanderA1/handly/iternal/repository"
-	"github.com/IskanderA1/handly/pkg/config"
 	passwordHash "github.com/IskanderA1/handly/pkg/hash"
 	"github.com/IskanderA1/handly/pkg/token"
 )
 
+type AdminSingInInput struct {
+	Username string
+	Password string
+}
+
+type AdminSignUpInput struct {
+	Username string
+	Password string
+	FullName string
+}
+
+type AdminConfig struct {
+	UserAgent string
+	ClientIp  string
+}
+
 type AdminsService struct {
 	adminRepository      repository.Admins
 	sessionRepository    repository.Sessions
-	tokenManger          token.Maker
+	adminTokenManger     token.Maker[token.AdminPayload, token.AdminPayloadInput]
 	accessTokenDuration  time.Duration
 	refreshTokenDuration time.Duration
 }
 
-func NewAdminsService(adminRepository repository.Admins, sessionRepository repository.Sessions, tokenManger token.Maker, config config.Config) *AdminsService {
+func NewAdminsService(dependence ServiceDependence) *AdminsService {
 	return &AdminsService{
-		tokenManger:          tokenManger,
-		adminRepository:      adminRepository,
-		sessionRepository:    sessionRepository,
-		accessTokenDuration:  config.AccessTokenDuration,
-		refreshTokenDuration: config.RefreshTokenDuration,
+		adminTokenManger:     dependence.AdminTokenManger,
+		adminRepository:      dependence.Repositories.Admins,
+		sessionRepository:    dependence.Repositories.Sessions,
+		accessTokenDuration:  dependence.Config.AccessTokenDuration,
+		refreshTokenDuration: dependence.Config.RefreshTokenDuration,
 	}
 }
 
@@ -65,7 +80,7 @@ func (s *AdminsService) SignUp(ctx context.Context, input AdminSignUpInput, admi
 
 func (s *AdminsService) RefreshToken(ctx context.Context, refreshToken string) (domain.Session, error) {
 
-	refreshPayload, err := s.tokenManger.VerifyAdminToken(refreshToken)
+	refreshPayload, err := s.adminTokenManger.VerifyToken(refreshToken)
 	if err != nil {
 		return domain.Session{}, fmt.Errorf("invalid refresh token")
 	}
@@ -91,9 +106,11 @@ func (s *AdminsService) RefreshToken(ctx context.Context, refreshToken string) (
 		return domain.Session{}, fmt.Errorf("expired session")
 	}
 
-	accessToken, accessPayload, err := s.tokenManger.CreateAdminToken(
-		refreshPayload.Username,
-		s.accessTokenDuration,
+	accessToken, accessPayload, err := s.adminTokenManger.CreateToken(
+		token.AdminPayloadInput{
+			Username: refreshPayload.Username,
+			Duration: s.accessTokenDuration,
+		},
 	)
 	if err != nil {
 		return domain.Session{}, fmt.Errorf("Failed to create accessToken")
@@ -143,12 +160,19 @@ func (s *AdminsService) Delete(ctx context.Context, username string) error {
 
 func (s *AdminsService) createSession(ctx context.Context, admin db.Admin, adminConfig AdminConfig) (domain.Session, error) {
 
-	accessToken, accessPayload, err := s.tokenManger.CreateAdminToken(admin.Username, s.accessTokenDuration)
+	accessToken, accessPayload, err := s.adminTokenManger.CreateToken(token.AdminPayloadInput{
+		Username: admin.Username,
+		Duration: s.accessTokenDuration,
+	})
 	if err != nil {
 		return domain.Session{}, err
 	}
 
-	refreshToken, refreshPayload, err := s.tokenManger.CreateAdminToken(admin.Username, s.refreshTokenDuration)
+	refreshToken, refreshPayload, err := s.adminTokenManger.CreateToken(
+		token.AdminPayloadInput{
+			Username: admin.Username,
+			Duration: s.refreshTokenDuration,
+		})
 	if err != nil {
 		return domain.Session{}, err
 	}

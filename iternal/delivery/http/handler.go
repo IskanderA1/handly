@@ -12,15 +12,23 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-type Handler struct {
-	services   *service.Services
-	tokenMaker token.Maker
+type HandlerDependence struct {
+	Services           *service.Services
+	AdminTokenManger   token.Maker[token.AdminPayload, token.AdminPayloadInput]
+	ProjectTokenManger token.Maker[token.ProjectPayload, token.ProjectPayloadInput]
 }
 
-func NewHandler(services *service.Services, tokenMaker token.Maker) *Handler {
+type Handler struct {
+	services           *service.Services
+	adminTokenManger   token.Maker[token.AdminPayload, token.AdminPayloadInput]
+	projectTokenManger token.Maker[token.ProjectPayload, token.ProjectPayloadInput]
+}
+
+func NewHandler(d HandlerDependence) *Handler {
 	return &Handler{
-		services:   services,
-		tokenMaker: tokenMaker,
+		services:           d.Services,
+		adminTokenManger:   d.AdminTokenManger,
+		projectTokenManger: d.ProjectTokenManger,
 	}
 }
 
@@ -41,7 +49,12 @@ func (h *Handler) initAPI(router *gin.Engine) {
 		v.RegisterValidation("event", validEvent)
 	}
 
-	handlerV1 := v1.NewHandler(h.services, h.tokenMaker)
+	d := v1.HandlerDependence{
+		Services:           h.services,
+		AdminTokenManger:   h.adminTokenManger,
+		ProjectTokenManger: h.projectTokenManger,
+	}
+	handlerV1 := v1.NewHandler(d)
 	api := router.Group("/api")
 	{
 		handlerV1.Init(api)

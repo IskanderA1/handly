@@ -22,22 +22,6 @@ type Projects interface {
 	Delete(ctx context.Context, id int64) error
 }
 
-type AdminSingInInput struct {
-	Username string
-	Password string
-}
-
-type AdminSignUpInput struct {
-	Username string
-	Password string
-	FullName string
-}
-
-type AdminConfig struct {
-	UserAgent string
-	ClientIp  string
-}
-
 type Admins interface {
 	SignIn(ctx context.Context, input AdminSingInInput, adminConfig AdminConfig) (domain.Session, error)
 	SignUp(ctx context.Context, input AdminSignUpInput, adminConfig AdminConfig) (domain.Admin, error)
@@ -48,21 +32,10 @@ type Admins interface {
 }
 
 type Services struct {
-	Projects Projects
-	Admins   Admins
-	Events   Events
-}
-
-type CreateEventInput struct {
-	ProjectID int64
-	Name      string
-	EventType domain.EventType
-}
-
-type UpdateEventInput struct {
-	ID        int64
-	Name      string
-	EventType domain.EventType
+	Projects     Projects
+	Admins       Admins
+	Events       Events
+	ProjectsLogs ProjectsLogs
 }
 
 type Events interface {
@@ -73,14 +46,36 @@ type Events interface {
 	Delete(ctx context.Context, id int64) error
 }
 
-func NewServices(repositories *repository.Repositories, tokenManger token.Maker, config config.Config) *Services {
-	projectsService := NewProjectsService(repositories.Projects, tokenManger)
-	adminsService := NewAdminsService(repositories.Admins, repositories.Sessions, tokenManger, config)
-	eventsService := NewEventsService(repositories.Events)
+type ProjectsLogs interface {
+	InitUser(ctx context.Context, inp UserInput) error
+	SendLog(ctx context.Context, inp LogInput) error
+}
+
+type AdminLogs interface{}
+
+type ServiceDependence struct {
+	Repositories       *repository.Repositories
+	AdminTokenManger   token.Maker[token.AdminPayload, token.AdminPayloadInput]
+	ProjectTokenManger token.Maker[token.ProjectPayload, token.ProjectPayloadInput]
+	Config             config.Config
+}
+
+func NewServices(dependence ServiceDependence) *Services {
+	projectsService := NewProjectsService(dependence.Repositories.Projects, dependence.ProjectTokenManger)
+	adminsService := NewAdminsService(dependence)
+	eventsService := NewEventsService(dependence.Repositories.Events)
+	projectsLogService := NewProjectsLogsService(
+		ProjectsLogsServiceDependency{
+			UserLogs:        dependence.Repositories.Users,
+			LogsRepository:  dependence.Repositories.Logs,
+			EventRepository: dependence.Repositories.Events,
+		},
+	)
 
 	return &Services{
-		Projects: projectsService,
-		Admins:   adminsService,
-		Events:   eventsService,
+		Projects:     projectsService,
+		Admins:       adminsService,
+		Events:       eventsService,
+		ProjectsLogs: projectsLogService,
 	}
 }

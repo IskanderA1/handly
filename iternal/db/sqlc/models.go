@@ -33,14 +33,6 @@ func (e *EventType) Scan(src interface{}) error {
 	return nil
 }
 
-type Account struct {
-	AccountID    string    `json:"accountID"`
-	Name         string    `json:"name"`
-	Uuid         string    `json:"uuid"`
-	LastUpdateAt time.Time `json:"lastUpdateAt"`
-	CreatedAt    time.Time `json:"createdAt"`
-}
-
 type Admin struct {
 	Username  string    `json:"username"`
 	Password  string    `json:"password"`
@@ -59,7 +51,7 @@ type Log struct {
 	ID        int64          `json:"id"`
 	ProjectID int64          `json:"projectID"`
 	EventID   int64          `json:"eventID"`
-	AccountID string         `json:"accountID"`
+	UserID    string         `json:"userID"`
 	Data      sql.NullString `json:"data"`
 	CreatedAt time.Time      `json:"createdAt"`
 }
@@ -80,4 +72,13 @@ type Session struct {
 	IsBlocked    bool      `json:"isBlocked"`
 	ExpiresAt    time.Time `json:"expiresAt"`
 	CreatedAt    time.Time `json:"createdAt"`
+}
+
+type User struct {
+	ID               string         `json:"id"`
+	ProjectAccountID sql.NullString `json:"projectAccountID"`
+	Name             sql.NullString `json:"name"`
+	Uuid             sql.NullString `json:"uuid"`
+	LastUpdateAt     time.Time      `json:"lastUpdateAt"`
+	CreatedAt        time.Time      `json:"createdAt"`
 }

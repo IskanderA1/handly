@@ -21,14 +21,14 @@ func (repo *LogsRepo) Create(ctx context.Context, param db.CreateLogParams) (db.
 	return repo.db.CreateLog(ctx, param)
 }
 
-func (repo *LogsRepo) GetById(ctx context.Context, id int64) (db.Log, error) {
-	return repo.db.GetLog(ctx, id)
+func (repo *LogsRepo) GetListProjectLog(ctx context.Context, param db.ListProjectLogParams) ([]db.Log, error) {
+	return repo.db.ListProjectLog(ctx, param)
 }
 
-func (repo *LogsRepo) GetList(ctx context.Context, param db.ListLogsParams) ([]db.Log, error) {
-	return repo.db.ListLogs(ctx, param)
+func (repo *LogsRepo) GetListUserLog(ctx context.Context, param db.ListUserLogParams) ([]db.Log, error) {
+	return repo.db.ListUserLog(ctx, param)
 }
 
-func (repo *LogsRepo) Delete(ctx context.Context, id int64) error {
-	return repo.db.DeleteLog(ctx, id)
+func (repo *LogsRepo) Delete(ctx context.Context, projectId int64) error {
+	return repo.db.DeleteProjectLogs(ctx, projectId)
 }

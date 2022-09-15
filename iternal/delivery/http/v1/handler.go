@@ -9,15 +9,23 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Handler struct {
-	services   *service.Services
-	tokenMaker token.Maker
+type HandlerDependence struct {
+	Services           *service.Services
+	AdminTokenManger   token.Maker[token.AdminPayload, token.AdminPayloadInput]
+	ProjectTokenManger token.Maker[token.ProjectPayload, token.ProjectPayloadInput]
 }
 
-func NewHandler(services *service.Services, tokenMaker token.Maker) *Handler {
+type Handler struct {
+	services           *service.Services
+	adminTokenManger   token.Maker[token.AdminPayload, token.AdminPayloadInput]
+	projectTokenManger token.Maker[token.ProjectPayload, token.ProjectPayloadInput]
+}
+
+func NewHandler(dependence HandlerDependence) *Handler {
 	return &Handler{
-		services:   services,
-		tokenMaker: tokenMaker,
+		services:           dependence.Services,
+		adminTokenManger:   dependence.AdminTokenManger,
+		projectTokenManger: dependence.ProjectTokenManger,
 	}
 }
 
@@ -25,6 +33,7 @@ func (h *Handler) Init(api *gin.RouterGroup) {
 	v1 := api.Group("/v1")
 	{
 		h.initAdminRoutes(v1)
+		h.initProjectLogsRoutes(v1)
 	}
 }
 

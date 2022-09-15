@@ -6,37 +6,40 @@ package db
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/google/uuid"
 )
 
 type Querier interface {
-	CreateAccount(ctx context.Context, arg CreateAccountParams) (Account, error)
 	CreateAdmin(ctx context.Context, arg CreateAdminParams) (Admin, error)
 	CreateEvent(ctx context.Context, arg CreateEventParams) (Event, error)
 	CreateLog(ctx context.Context, arg CreateLogParams) (Log, error)
 	CreateProject(ctx context.Context, arg CreateProjectParams) (Project, error)
 	CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error)
-	DeleteAccount(ctx context.Context, accountID string) error
+	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	DeleteAdmin(ctx context.Context, username string) error
 	DeleteEvent(ctx context.Context, id int64) error
-	DeleteLog(ctx context.Context, id int64) error
 	DeleteProject(ctx context.Context, id int64) error
-	GetAccount(ctx context.Context, accountID string) (Account, error)
+	DeleteProjectLogs(ctx context.Context, projectID int64) error
+	DeleteUser(ctx context.Context, id string) error
 	GetAdminByUsername(ctx context.Context, username string) (Admin, error)
 	GetEvent(ctx context.Context, id int64) (Event, error)
-	GetLog(ctx context.Context, id int64) (Log, error)
+	GetEventByName(ctx context.Context, name string) (Event, error)
 	GetProject(ctx context.Context, id int64) (Project, error)
 	GetSession(ctx context.Context, id uuid.UUID) (Session, error)
-	ListAccounts(ctx context.Context, arg ListAccountsParams) ([]Account, error)
+	GetUserByProjectAccountId(ctx context.Context, projectAccountID sql.NullString) (User, error)
+	GetUserByUUID(ctx context.Context, uuid sql.NullString) (User, error)
 	ListAdmins(ctx context.Context, arg ListAdminsParams) ([]Admin, error)
 	ListEventsByProjectId(ctx context.Context, projectID int64) ([]Event, error)
-	ListLogs(ctx context.Context, arg ListLogsParams) ([]Log, error)
+	ListProjectLog(ctx context.Context, arg ListProjectLogParams) ([]Log, error)
 	ListProjects(ctx context.Context, arg ListProjectsParams) ([]Project, error)
-	UpdateAccount(ctx context.Context, arg UpdateAccountParams) (Account, error)
+	ListUserLog(ctx context.Context, arg ListUserLogParams) ([]Log, error)
+	ListUsers(ctx context.Context, arg ListUsersParams) ([]User, error)
 	UpdateAdmin(ctx context.Context, arg UpdateAdminParams) (Admin, error)
 	UpdateEvent(ctx context.Context, arg UpdateEventParams) (Event, error)
 	UpdateProject(ctx context.Context, arg UpdateProjectParams) (Project, error)
+	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
 }
 
 var _ Querier = (*Queries)(nil)

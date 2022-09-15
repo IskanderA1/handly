@@ -64,6 +64,23 @@ func (q *Queries) GetEvent(ctx context.Context, id int64) (Event, error) {
 	return i, err
 }
 
+const getEventByName = `-- name: GetEventByName :one
+SELECT id, project_id, name, event_type FROM events
+WHERE name = $1 LIMIT 1
+`
+
+func (q *Queries) GetEventByName(ctx context.Context, name string) (Event, error) {
+	row := q.db.QueryRowContext(ctx, getEventByName, name)
+	var i Event
+	err := row.Scan(
+		&i.ID,
+		&i.ProjectID,
+		&i.Name,
+		&i.EventType,
+	)
+	return i, err
+}
+
 const listEventsByProjectId = `-- name: ListEventsByProjectId :many
 SELECT id, project_id, name, event_type FROM events
 WHERE project_id = $1

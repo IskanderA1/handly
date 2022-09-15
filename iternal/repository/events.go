@@ -25,6 +25,10 @@ func (repo *EventsRepo) GetById(ctx context.Context, id int64) (db.Event, error)
 	return repo.db.GetEvent(ctx, id)
 }
 
+func (repo *EventsRepo) GetByName(ctx context.Context, name string) (db.Event, error) {
+	return repo.db.GetEventByName(ctx, name)
+}
+
 func (repo *EventsRepo) GetListEventsByProjectId(ctx context.Context, projectId int64) ([]db.Event, error) {
 	return repo.db.ListEventsByProjectId(ctx, projectId)
 }

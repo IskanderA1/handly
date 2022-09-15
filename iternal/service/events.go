@@ -10,6 +10,18 @@ import (
 	"github.com/IskanderA1/handly/iternal/repository"
 )
 
+type CreateEventInput struct {
+	ProjectID int64
+	Name      string
+	EventType domain.EventType
+}
+
+type UpdateEventInput struct {
+	ID        int64
+	Name      string
+	EventType domain.EventType
+}
+
 type EventsService struct {
 	repository repository.Events
 }

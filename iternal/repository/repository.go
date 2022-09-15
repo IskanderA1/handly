@@ -26,17 +26,19 @@ type Projects interface {
 	Delete(ctx context.Context, id int64) error
 }
 
-type Accounts interface {
-	Create(ctx context.Context, param db.CreateAccountParams) (db.Account, error)
-	GetById(ctx context.Context, id string) (db.Account, error)
-	GetList(ctx context.Context, param db.ListAccountsParams) ([]db.Account, error)
-	Update(ctx context.Context, param db.UpdateAccountParams) (db.Account, error)
+type Users interface {
+	Create(ctx context.Context, param db.CreateUserParams) (db.User, error)
+	GetUserByProjectAccountId(ctx context.Context, accountId string) (NullUser, error)
+	GetUserByUUID(ctx context.Context, uuid string) (NullUser, error)
+	GetListUsers(ctx context.Context, param db.ListUsersParams) ([]db.User, error)
+	Update(ctx context.Context, param db.UpdateUserParams) (db.User, error)
 	Delete(ctx context.Context, id string) error
 }
 
 type Events interface {
 	Create(ctx context.Context, param db.CreateEventParams) (db.Event, error)
 	GetById(ctx context.Context, id int64) (db.Event, error)
+	GetByName(ctx context.Context, name string) (db.Event, error)
 	GetListEventsByProjectId(ctx context.Context, projectID int64) ([]db.Event, error)
 	Update(ctx context.Context, param db.UpdateEventParams) (db.Event, error)
 	Delete(ctx context.Context, id int64) error
@@ -44,8 +46,8 @@ type Events interface {
 
 type Logs interface {
 	Create(ctx context.Context, param db.CreateLogParams) (db.Log, error)
-	GetById(ctx context.Context, id int64) (db.Log, error)
-	GetList(ctx context.Context, param db.ListLogsParams) ([]db.Log, error)
+	GetListProjectLog(ctx context.Context, param db.ListProjectLogParams) ([]db.Log, error)
+	GetListUserLog(ctx context.Context, param db.ListUserLogParams) ([]db.Log, error)
 	Delete(ctx context.Context, id int64) error
 }
 
@@ -57,7 +59,7 @@ type Sessions interface {
 type Repositories struct {
 	Admins   Admins
 	Projects Projects
-	Accounts Accounts
+	Users    Users
 	Events   Events
 	Logs     Logs
 	Sessions Sessions
@@ -67,7 +69,7 @@ func NewRepositories(db *sql.DB) *Repositories {
 	return &Repositories{
 		Admins:   NewAdminssRepo(db),
 		Projects: NewProjectsRepo(db),
-		Accounts: NewAccountsRepo(db),
+		Users:    NewUsersRepo(db),
 		Events:   NewEventsRepo(db),
 		Logs:     NewLogsRepo(db),
 		Sessions: NewSessionsRepo(db),

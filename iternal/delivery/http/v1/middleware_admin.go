@@ -5,17 +5,12 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/IskanderA1/handly/iternal/domain"
 	"github.com/gin-gonic/gin"
 )
 
-const (
-	authorizationHeaderKey  = "authorization"
-	authorizationTypeBearer = "bearer"
-	authorizationPayloadKey = "authorization_payload"
-)
-
 func (h *Handler) authMiddleware(ctx *gin.Context) {
-	authorizationHeader := ctx.GetHeader(authorizationHeaderKey)
+	authorizationHeader := ctx.GetHeader(domain.AuthorizationHeaderKey)
 
 	if len(authorizationHeader) == 0 {
 		errorResponse(ctx, http.StatusUnauthorized, "authorization header is not provided")
@@ -29,17 +24,17 @@ func (h *Handler) authMiddleware(ctx *gin.Context) {
 	}
 
 	authorizationType := strings.ToLower(fields[0])
-	if authorizationType != authorizationTypeBearer {
+	if authorizationType != domain.AuthorizationTypeBearer {
 		err := fmt.Errorf("unsupported authorization type %s", authorizationType)
 		errorResponse(ctx, http.StatusUnauthorized, err.Error())
 		return
 	}
 
 	accessToken := fields[1]
-	payload, err := h.tokenMaker.VerifyAdminToken(accessToken)
+	payload, err := h.adminTokenManger.VerifyToken(accessToken)
 	if err != nil {
 		errorResponse(ctx, http.StatusUnauthorized, err.Error())
 		return
 	}
-	ctx.Set(authorizationPayloadKey, payload)
+	ctx.Set(domain.AuthorizationPayloadKey, payload)
 }

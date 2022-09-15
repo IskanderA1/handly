@@ -6,6 +6,11 @@ import (
 	"github.com/google/uuid"
 )
 
+type AdminPayloadInput struct {
+	Username string
+	Duration time.Duration
+}
+
 type AdminPayload struct {
 	ID        uuid.UUID
 	Username  string    `json:"name"`
@@ -13,7 +18,7 @@ type AdminPayload struct {
 	ExpiredAt time.Time `json:"expired_at"`
 }
 
-func NewAdminPayload(username string, duration time.Duration) (*AdminPayload, error) {
+func NewAdminPayload(inp AdminPayloadInput) (*AdminPayload, error) {
 	tokenId, err := uuid.NewRandom()
 	if err != nil {
 		return nil, err
@@ -21,9 +26,9 @@ func NewAdminPayload(username string, duration time.Duration) (*AdminPayload, er
 
 	payload := &AdminPayload{
 		ID:        tokenId,
-		Username:  username,
+		Username:  inp.Username,
 		IssuedAt:  time.Now(),
-		ExpiredAt: time.Now().Add(duration),
+		ExpiredAt: time.Now().Add(inp.Duration),
 	}
 	return payload, nil
 }

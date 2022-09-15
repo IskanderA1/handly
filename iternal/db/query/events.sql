@@ -12,6 +12,10 @@ RETURNING *;
 SELECT * FROM events
 WHERE id = $1 LIMIT 1;
 
+-- name: GetEventByName :one
+SELECT * FROM events
+WHERE name = $1 LIMIT 1;
+
 
 -- name: ListEventsByProjectId :many
 SELECT * FROM events
